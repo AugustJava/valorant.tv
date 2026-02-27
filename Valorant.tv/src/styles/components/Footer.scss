@@ -1,0 +1,36 @@
+footer {
+  width: 100%;
+  padding: 30px;
+
+  border-top: 1px solid hsl(240 3.7% 15.9%);
+
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 30px;
+
+  .contacts {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 30px;
+
+    p {
+      border-bottom: hsl(240, 3%, 29%) 1px solid;
+      padding: 3px 10px;
+      border-radius: 4px;
+    }
+  }
+}
+
+@media (max-width: 550px) {
+  footer {
+    .contacts {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-direction: column;
+    }
+  }
+}
