@@ -61,3 +61,15 @@ class TeamStats(BaseModel):
 
     class Config:
         from_attributes = True
+
+class UserCreate(BaseModel):
+    username: str
+    password: str # Обычный текст, который мы захешируем в main.py
+
+class UserOut(BaseModel):
+    id: int
+    username: str
+    is_admin: bool
+
+    class Config:
+        from_attributes = True

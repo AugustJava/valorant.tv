@@ -3,6 +3,15 @@ from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy.orm import Session, joinedload
 import models, schemas, database
 from sqlalchemy import or_
+from passlib.context import CryptContext
+
+# Настройка шифровальщика
+pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
+
+def get_password_hash(password):
+    return pwd_context.hash(password)
+
+
 
 # Создаем таблицы
 models.Base.metadata.create_all(bind=database.engine)
@@ -16,6 +25,26 @@ app.add_middleware(
     allow_headers=["*"]
 )
 
+@app.post("/register", response_model=schemas.UserOut)
+async def register_user(user_data: schemas.UserCreate, db: Session = Depends(database.get_db)):
+    # 1. Проверяем, есть ли уже такой пользователь
+    existing_user = db.query(models.UserModel).filter(models.UserModel.username==user_data.username).first()
+    if existing_user:
+        raise HTTPException(status_code=400, detail="Пользователь с таким именем уже существует")
+    
+    # 2. Хешируем пароль
+    hashed_pass = get_password_hash(user_data.password)
+    # 3. Создаем запись в базе
+    new_user = models.UserModel(
+        username=user_data.username,
+        hashed_password=hashed_pass,
+        is_admin=False
+    )
+    db.add(new_user)
+    db.commit()
+    db.refresh(new_user)
+
+    return new_user
 # --- RANKINGS ---
 @app.get("/rankings/{region}")
 async def get_rankings(region: str, db: Session = Depends(database.get_db)):

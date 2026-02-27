@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String, ForeignKey
+from sqlalchemy import Column, Integer, String, ForeignKey, Boolean
 from sqlalchemy.orm import relationship
 from database import Base
 
@@ -43,3 +43,12 @@ class MatchModel(Base):
 
     team_home = relationship("TeamModel", foreign_keys=[team_home_id])
     team_away = relationship("TeamModel", foreign_keys=[team_away_id])
+
+class UserModel(Base):
+
+    __tablename__ = "users"
+
+    id = Column(Integer, primary_key=True, index=True)
+    username = Column(String, unique=True, index=True)
+    hashed_password = Column(String)
+    is_admin = Column(Boolean, default=False)
