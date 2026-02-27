@@ -46,3 +46,18 @@ class MatchRead(BaseModel):
     team_away: TeamShort
     class Config:
         from_attributes = True
+
+class MatchUpdateStatus(BaseModel):
+    status: str
+
+class TeamStats(BaseModel):
+    team_id: int
+    team_name: str
+    wins: int
+    losses: int
+    draws: int
+    total_matches: int
+    winrate: str
+
+    class Config:
+        from_attributes = True
