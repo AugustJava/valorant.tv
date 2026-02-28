@@ -4,6 +4,7 @@ from typing import List
 from sqlalchemy import or_
 # Импортируем твои файлы (пути могут чуть отличаться в зависимости от твоей структуры)
 import models, schemas, database
+from auth import get_current_user
 
 # Создаем роутер. 
 # prefix="/teams" значит, что ко всем путям ниже автоматически добавится /teams
@@ -19,6 +20,17 @@ def get_teams(region: str = None, db: Session = Depends(database.get_db)):
     if region:
         query = query.filter(models.TeamModel.region == region)
     return query.all()
+
+@router.post("/", response_model=schemas.TeamResponse)
+def post_team(team: schemas.TeamCreate, db: Session = Depends(database.get_db),
+    current_user: models.UserModel = Depends(get_current_user)):
+    if not current_user.is_admin:
+        raise HTTPException(status_code=403, detail="У вас нет прав супер-админа")
+    db_team = models.TeamModel(**team.dict())
+    db.add(db_team)
+    db.commit()
+    db.refresh(db_team)
+    return db_team
 
 @router.get("/{team_id}/stats", response_model=schemas.TeamStats)
 def get_team_stats(team_id: int, db: Session = Depends(database.get_db)):
