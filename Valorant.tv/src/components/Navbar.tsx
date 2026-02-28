@@ -29,6 +29,9 @@ const Navbar = () => {
         <Link to="/news" className="nav_link">
           News
         </Link>
+        <Link to="/teams" className="nav_link">
+          Teams
+        </Link>
         <Link to="/rankings" className="nav_link">
           Rankings
         </Link>
