@@ -7,6 +7,7 @@ from sqlalchemy import or_
 from passlib.context import CryptContext
 from datetime import datetime, timedelta
 from jose import jwt, JWTError
+from typing import Optional, List
 
 
 
@@ -104,7 +105,7 @@ async def login(form_data: OAuth2PasswordRequestForm = Depends(), db: Session = 
 
 
 # --- NEWS ---
-@app.get("/news", response_model=list[schemas.NewsResponse])
+@app.get("/news", response_model=List[schemas.NewsResponse])
 async def get_news(db: Session = Depends(database.get_db)):
     return db.query(models.NewsModel).all()
 
@@ -122,10 +123,24 @@ async def create_news(news: schemas.NewsCreate, db: Session = Depends(database.g
 
 # --- МАТЧИ ---
 
-@app.get("/matches", response_model=list[schemas.MatchResponse])
+@app.get("/matches", response_model=List[schemas.MatchResponse])
 def get_matches(db: Session = Depends(database.get_db)):
     # Благодаря relationship в моделях, подгрузка команд произойдет автоматически
     return db.query(models.MatchModel).all()
+
+@app.post("/matches", response_model=schemas.MatchResponse)
+def create_match(match: schemas.MatchCreate, db: Session = Depends(database.get_db), current_user: models.UserModel = Depends(get_current_user)):
+    home_exists = db.query(models.TeamModel).filter(models.TeamModel.id == match.team_home_id)
+    away_exists = db.query(models.TeamModel).filter(models.TeamModel.id == match.team_away_id)
+    if not home_exists or not away_exists:
+        raise HTTPException(status_code=404, detail="Одна или обе команды не найдены")
+    if match.team_away_id == match.team_home_id:
+        raise HTTPException(status_code=404, detail="Команда не может играть против самой себя")
+    db_match = models.MatchModel(**match.dict())
+    db.add(db_match)
+    db.commit()
+    db.refresh(db_match)
+    return db_match
 
 @app.patch("/matches/{match_id}/status")
 def update_match_status(
@@ -144,10 +159,21 @@ def update_match_status(
 
 # --- СТАТИСТИКА КОМАНД ---
 
-@app.get("/teams", response_model=list[schemas.TeamResponse])
+@app.get("/teams", response_model=List[schemas.TeamResponse])
 def get_teams(db: Session =Depends(database.get_db)):
     teams = db.query(models.TeamModel).all()
     return teams
+
+@app.get("/teams/", response_model=schemas.TeamResponse)
+def get_teams(
+    region: Optional[str] = None, #необязательный параметр в URL
+    db: Session = Depends(database.get_db)
+):
+    query = db.query(models.TeamModel)
+    if region:
+        query = query.filter(models.TeamModel.region==region)
+    return query.all()
+
 
 @app.get("/teams/{team_id}/stats", response_model=schemas.TeamStats)
 def get_team_stats(team_id: int, db: Session = Depends(database.get_db)):
