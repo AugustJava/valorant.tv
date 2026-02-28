@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String, Boolean, ForeignKey, DateTime
+from sqlalchemy import Column, Integer, String, Boolean, ForeignKey, DateTime, Date, BigInteger
 from sqlalchemy.orm import relationship
 import datetime
 from database import Base # Убедись, что импортируешь свой Base
@@ -35,6 +35,8 @@ class MatchModel(Base):
     # Ссылаемся на id из таблицы teams
     team_home_id = Column(Integer, ForeignKey("teams.id"))
     team_away_id = Column(Integer, ForeignKey("teams.id"))
+
+    tournament_id = Column(Integer, ForeignKey("tournaments.id"))
     
     team_home_score = Column(Integer, default=0)
     team_away_score = Column(Integer, default=0)
@@ -44,3 +46,15 @@ class MatchModel(Base):
     # Магия SQLAlchemy: связи, чтобы получать полные данные о командах в матче
     home_team = relationship("TeamModel", foreign_keys=[team_home_id])
     away_team = relationship("TeamModel", foreign_keys=[team_away_id])
+    tournament = relationship("TournamentModel", foreign_keys=[tournament_id])
+
+class TournamentModel(Base):
+    __tablename__ = "tournaments"
+    id = Column(Integer, primary_key=True, index=True)
+    name = Column(String, unique=True)
+    location = Column(String)
+    start_date = Column(Date)
+    end_date = Column(Date)
+
+    prize_pool = Column(BigInteger)
+    region = Column(String)

@@ -1,5 +1,6 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 from typing import Optional, List
+from datetime import date
 import datetime
 
 # --- Схемы Команд ---
@@ -35,8 +36,9 @@ class MatchBase(BaseModel):
     # Теперь при создании матча передаются только ID команд!
     team_home_id: int
     team_away_id: int
-    team_home_score: int = 0
-    team_away_score: int = 0
+    tournament_id: int
+    team_home_score: Optional[int] = None
+    team_away_score: Optional[int] = None
     status: str = "scheduled"
     match_date: Optional[datetime.datetime] = None
 
@@ -78,6 +80,23 @@ class NewsCreate(NewsBase):
 class NewsResponse(NewsBase):
     id: int
     created_at: datetime.datetime
+
+    class Config:
+        from_attributes = True
+
+class TournamentBase(BaseModel):
+    name: str
+    location: str
+    start_date: date  # Принимает строку формата "YYYY-MM-DD"
+    end_date: date
+    prize_pool: int = Field(gt=0) # Проверка, что призовой фонд больше 0
+    region: str
+
+class TournamentCreate(TournamentBase):
+    pass
+
+class TournamentResponse(TournamentBase):
+    id: int
 
     class Config:
         from_attributes = True

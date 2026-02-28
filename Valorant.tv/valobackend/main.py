@@ -130,8 +130,16 @@ def get_matches(db: Session = Depends(database.get_db)):
 
 @app.post("/matches", response_model=schemas.MatchResponse)
 def create_match(match: schemas.MatchCreate, db: Session = Depends(database.get_db), current_user: models.UserModel = Depends(get_current_user)):
-    home_exists = db.query(models.TeamModel).filter(models.TeamModel.id == match.team_home_id)
-    away_exists = db.query(models.TeamModel).filter(models.TeamModel.id == match.team_away_id)
+    if not current_user.is_admin:
+        raise HTTPException(status_code=403, detail="У вас нет прав супер-админа")
+    
+    tournament = db.query(models.TournamentModel).filter(models.TournamentModel.id==match.tournament_id).first()
+
+    if not tournament:
+        raise HTTPException(status_code=400, detail="Матч не входит в турниры")
+
+    home_exists = db.query(models.TeamModel).filter(models.TeamModel.id == match.team_home_id).first()
+    away_exists = db.query(models.TeamModel).filter(models.TeamModel.id == match.team_away_id).first()
     if not home_exists or not away_exists:
         raise HTTPException(status_code=404, detail="Одна или обе команды не найдены")
     if match.team_away_id == match.team_home_id:
@@ -212,6 +220,20 @@ def get_team_stats(team_id: int, db: Session = Depends(database.get_db)):
         "total_matches": total,
         "winrate": winrate
     }
+
+@app.post("/tourmanents", response_model=schemas.TournamentResponse)
+def create_tournament(
+    tournament: schemas.TournamentCreate,
+    db: Session = Depends(database.get_db),
+    current_user: models.UserModel = Depends(get_current_user)):
+
+    if not current_user.is_admin:
+        raise HTTPException(status_code=403, detail="У вас нет прав супер-админа")
+    db_tournament = models.TournamentModel(**tournament.dict())
+    db.add(db_tournament)
+    db.commit()
+    db.refresh(db_tournament)
+    return db_tournament
 
 if __name__ == "__main__":
     import uvicorn
