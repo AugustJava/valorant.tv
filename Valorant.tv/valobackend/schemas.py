@@ -1,54 +1,22 @@
-from pydantic import BaseModel, Field
+from pydantic import BaseModel
 from typing import Optional, List
+import datetime
 
-# Короткая инфо о команде для вкладывания в матчи
-class TeamShort(BaseModel):
-    id: int
+# --- Схемы Команд ---
+class TeamBase(BaseModel):
     team: str
-    logo: str
-    country: str
-    class Config:
-        from_attributes = True
+    region: str
+    logo_url: Optional[str] = None
+    is_active: bool = True
 
-class TeamCreate(BaseModel):
-    rank: str = Field(..., pattern=r"^\d+$")
-    team: str = Field(..., min_length=2)
-    country: str
-    last_played: str
-    last_played_team: str
-    last_played_logo: str
-    record: str = Field(..., pattern=r"^\d+-\d+$")
-    earnings: str
-    logo: str
+class TeamCreate(TeamBase):
+    pass
 
-class NewsCreate(BaseModel):
-    title: str = Field(..., min_length=5)
-    description: str
-    date: str
-    author: str
-    url_path: str
-
-class MatchCreate(BaseModel):
-    team_home_id: int
-    team_away_id: int
-    score_home: int = 0
-    score_away: int = 0
-    status: str = "upcoming"
-    date: str
-
-class MatchRead(BaseModel):
+class TeamResponse(TeamBase):
     id: int
-    score_home: int
-    score_away: int
-    status: str
-    date: str
-    team_home: TeamShort
-    team_away: TeamShort
-    class Config:
-        from_attributes = True
 
-class MatchUpdateStatus(BaseModel):
-    status: str
+    class Config:
+        from_attributes = True # Для Pydantic V2 (или orm_mode = True, если у тебя старая версия)
 
 class TeamStats(BaseModel):
     team_id: int
@@ -59,17 +27,57 @@ class TeamStats(BaseModel):
     total_matches: int
     winrate: str
 
+class MatchUpdateStatus(BaseModel):
+    status: str # Например: "finished", "live"
+
+# --- Схемы Матчей ---
+class MatchBase(BaseModel):
+    # Теперь при создании матча передаются только ID команд!
+    team_home_id: int
+    team_away_id: int
+    team_home_score: int = 0
+    team_away_score: int = 0
+    status: str = "scheduled"
+    match_date: Optional[datetime.datetime] = None
+
+class MatchCreate(MatchBase):
+    pass
+
+class MatchResponse(MatchBase):
+    id: int
+    
+    # Это самая крутая часть! В ответе матча будут вложены данные о командах
+    home_team: TeamResponse 
+    away_team: TeamResponse
+
     class Config:
         from_attributes = True
 
-class UserCreate(BaseModel):
+# --- Схемы Пользователей ---
+class UserBase(BaseModel):
     username: str
-    password: str # Обычный текст, который мы захешируем в main.py
 
-class UserOut(BaseModel):
+class UserCreate(UserBase):
+    password: str
+
+class UserResponse(UserBase):
     id: int
-    username: str
     is_admin: bool
+
+    class Config:
+        from_attributes = True
+
+# --- Схемы Новостей ---
+class NewsBase(BaseModel):
+    title: str
+    content: str
+
+class NewsCreate(NewsBase):
+    pass
+
+class NewsResponse(NewsBase):
+    id: int
+    created_at: datetime.datetime
 
     class Config:
         from_attributes = True
