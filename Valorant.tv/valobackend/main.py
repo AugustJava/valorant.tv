@@ -108,7 +108,7 @@ async def login(form_data: OAuth2PasswordRequestForm = Depends(), db: Session = 
 async def get_news(db: Session = Depends(database.get_db)):
     return db.query(models.NewsModel).all()
 
-@app.post("/news", response_model=list[schemas.NewsResponse])
+@app.post("/news", response_model=schemas.NewsResponse)
 async def create_news(news: schemas.NewsCreate, db: Session = Depends(database.get_db),
     current_user : models.UserModel = Depends(get_current_user)):
     # Проверяем флаг в базе данных
@@ -144,7 +144,10 @@ def update_match_status(
 
 # --- СТАТИСТИКА КОМАНД ---
 
-
+@app.get("/teams", response_model=list[schemas.TeamResponse])
+def get_teams(db: Session =Depends(database.get_db)):
+    teams = db.query(models.TeamModel).all()
+    return teams
 
 @app.get("/teams/{team_id}/stats", response_model=schemas.TeamStats)
 def get_team_stats(team_id: int, db: Session = Depends(database.get_db)):

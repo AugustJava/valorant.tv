@@ -7,7 +7,7 @@ class TeamBase(BaseModel):
     team: str
     region: str
     logo_url: Optional[str] = None
-    is_active: bool = True
+    is_active: Optional[bool] = True # Optional позволит Pydantic проигнорировать отсутствие поля в базе
 
 class TeamCreate(TeamBase):
     pass
