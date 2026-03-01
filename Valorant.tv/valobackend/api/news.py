@@ -8,7 +8,14 @@ router = APIRouter(prefix="/news", tags=["News"])
 
 @router.get("/", response_model=List[schemas.NewsResponse])
 def get_news(db: Session = Depends(database.get_db)):
-    return db.query(models.NewsModel).all()
+    return db.query(models.NewsModel).order_by(models.NewsModel.created_at.desc()).all()
+
+@router.get("/{news_id}", response_model=schemas.NewsResponse)
+def get_news_article(news_id: int, db: Session = Depends(database.get_db)):
+    aritcle = db.query(models.NewsModel).filter(models.NewsModel.id==news_id).first()
+    if not aritcle:
+        raise HTTPException(status_code=404, detail="News not found")
+    return aritcle
 
 @router.post("/", response_model=schemas.NewsResponse)
 async def create_news(news: schemas.NewsCreate, db: Session = Depends(database.get_db),

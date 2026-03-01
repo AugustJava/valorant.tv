@@ -1,7 +1,7 @@
 from sqlalchemy import Column, Integer, String, Boolean, ForeignKey, DateTime, Date, BigInteger
 from sqlalchemy.orm import relationship
 import datetime
-from database import Base # Убедись, что импортируешь свой Base
+from database import Base 
 
 class UserModel(Base):
     __tablename__ = "users"
@@ -16,7 +16,10 @@ class NewsModel(Base):
 
     id = Column(Integer, primary_key=True, index=True)
     title = Column(String, index=True)
+    summary = Column(String)
     content = Column(String)
+    author = Column(String)
+    image_url = Column(String)
     created_at = Column(DateTime, default=datetime.datetime.utcnow)
 
 class TeamModel(Base):
@@ -58,3 +61,4 @@ class TournamentModel(Base):
 
     prize_pool = Column(BigInteger)
     region = Column(String)
+    logo_url = Column(String, nullable=True) 

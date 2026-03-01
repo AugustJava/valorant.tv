@@ -72,7 +72,10 @@ class UserResponse(UserBase):
 # --- Схемы Новостей ---
 class NewsBase(BaseModel):
     title: str
+    summary: str
     content: str
+    author: str
+    image_url: Optional[str] = None
 
 class NewsCreate(NewsBase):
     pass
@@ -91,6 +94,7 @@ class TournamentBase(BaseModel):
     end_date: date
     prize_pool: int = Field(gt=0) # Проверка, что призовой фонд больше 0
     region: str
+    logo_url: Optional[str] = None 
 
 class TournamentCreate(TournamentBase):
     pass

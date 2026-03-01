@@ -12,10 +12,14 @@ router = APIRouter(
 )
 
 
-@router.get("/", response_model=List[schemas.MatchResponse])
-def get_matches(db: Session = Depends(database.get_db)):
-    # Благодаря relationship в моделях, подгрузка команд произойдет автоматически
-    return db.query(models.MatchModel).all()
+@router.get("/")
+def get_matches(status: str = None, tournament_id: int = None, db: Session = Depends(database.get_db)):
+    query = db.query(models.MatchModel)
+    if status:
+        query = query.filter(models.MatchModel.status == status)
+    if tournament_id:
+        query = query.filter(models.MatchModel.tournament_id == tournament_id)
+    return query.all()
 
 @router.post("/", response_model=schemas.MatchResponse)
 def create_match(match: schemas.MatchCreate, db: Session = Depends(database.get_db), current_user: models.UserModel = Depends(get_current_user)):

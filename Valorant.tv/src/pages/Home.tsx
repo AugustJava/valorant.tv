@@ -1,12 +1,15 @@
 import "../styles/pages/Home.scss";
 import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
+import TournamentBanner from "../components/TournamentBanner";
 import { Link } from "react-router";
 
 function Home() {
   return (
     <>
       <Navbar />
+      {/* 1. Добавляем баннер сразу после Навбара */}
+      <TournamentBanner />
       <div className="page-title">View Teams Attending VCT Masters Bangkok</div>
       <div className="teams_container">
         <div className="grid_container">

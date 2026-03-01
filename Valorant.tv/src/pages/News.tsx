@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react"; // Добавляем хук
 import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
 import "../styles/pages/News.scss";
+import { Link } from "react-router";
 
 // 1. Описываем структуру новости, которая приходит из FastAPI (модель NewsResponse)
 interface NewsItem {
@@ -51,11 +52,13 @@ const News = () => {
           news.map((item) => (
             <div key={item.id} className="news-item">
               <h2>{item.title}</h2>
-              <p>{item.content}</p>
+              {/* <p>{item.summary}</p> */}
               <p>
                 <strong>Date:</strong> {new Date(item.created_at).toLocaleDateString()}
               </p>
-              <button className="read-more-btn">Read more</button>
+              <Link to={`/news/${item.id}`} className="read-more-btn">
+              Read more
+              </Link>
             </div>
           ))
         )}

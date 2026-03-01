@@ -7,6 +7,7 @@ import Rankings from "./pages/Rankings.tsx";
 import News from "./pages/News.tsx";
 import TeamPage from "./pages/TeamPage.tsx";
 import Teams from "./pages/Teams.tsx";
+import Article from './pages/Articles.tsx';
 
 createRoot(document.getElementById("root")!).render(
   <BrowserRouter basename="/">
@@ -19,6 +20,7 @@ createRoot(document.getElementById("root")!).render(
       <Route path="/news" element={<News />} />
       <Route path="/teams" element={<Teams />}/>
       <Route path="*" element={<h1>404 Not Found</h1>} />
+      <Route path="/news/:id" element={<Article />} />
     </Routes>
   </BrowserRouter>
 );
